@@ -1,0 +1,405 @@
+{
+	"info": {
+		"_postman_id": "f0c16d22-02a4-4f7a-954b-f7d92bf5be4f",
+		"name": "FlareAutomationTestingTask",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24352580"
+	},
+	"item": [
+		{
+			"name": "/images/search",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Saving image id in a global variable",
+							"const response = pm.response.json();",
+							"pm.globals.set(\"image_id\", response[0].id);",
+							"",
+							"pm.test(\"Status code is OK/200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"No error appears in the response body\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"    pm.response.to.not.have.jsonBody(\"error\"); ",
+							"});",
+							"",
+							"pm.test(\"The response body has all the expected properties\", () => {",
+							"var jsonData = pm.response.json();",
+							"        pm.expect(jsonData[0]).to.be.an(\"object\");",
+							"        pm.expect(jsonData[0].breeds).to.be.an('array');",
+							"        pm.expect(jsonData[0].id).to.be.a('string');",
+							"        pm.expect(jsonData[0].url).to.be.a('string');",
+							"        pm.expect(jsonData[0].width).to.be.a('number');",
+							"        pm.expect(jsonData[0].height).to.be.a('number');",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "x-api-key",
+						"value": "{{YOUR-API-KEY}}",
+						"description": "[optional] without it only the a basic set of images can be searched"
+					}
+				],
+				"url": {
+					"raw": "{{endpoint}}v1/images/search",
+					"host": [
+						"{{endpoint}}v1"
+					],
+					"path": [
+						"images",
+						"search"
+					],
+					"query": [
+						{
+							"key": "size",
+							"value": "full",
+							"description": "[optional] thumb , small, med or full - small is perfect for Discord",
+							"disabled": true
+						},
+						{
+							"key": "mime_types",
+							"value": "jpg,png,gif",
+							"description": "[optional] a comma separated strig of types to return e.g. jpg,png for static, or gif for gifs",
+							"disabled": true
+						},
+						{
+							"key": "format",
+							"value": "json",
+							"description": "[optional] json | src",
+							"disabled": true
+						},
+						{
+							"key": "order",
+							"value": "RANDOM",
+							"description": "[optional] default:RANDOM - RANDOM | ASC | DESC",
+							"disabled": true
+						},
+						{
+							"key": "page",
+							"value": "0",
+							"description": "[optional] paginate through results",
+							"disabled": true
+						},
+						{
+							"key": "limit",
+							"value": "10",
+							"description": "[optional] number of results to return, up to 25 with a valid API-Key",
+							"disabled": true
+						},
+						{
+							"key": "category_ids",
+							"value": "",
+							"description": "[optional] category ids from /categories route",
+							"disabled": true
+						},
+						{
+							"key": "breed_ids",
+							"value": "beng",
+							"description": "[optional] breed ids from /breeds route",
+							"disabled": true
+						},
+						{
+							"key": "has_breeds",
+							"value": "true",
+							"description": "[optional] true/false - only return images that have at least 1 breed",
+							"disabled": true
+						},
+						{
+							"key": "include_breeds",
+							"value": "true",
+							"description": "[optional] true/false - Include the 'breeds' array - default true",
+							"disabled": true
+						},
+						{
+							"key": "include_categories",
+							"value": "true",
+							"description": "[optional] true/false - Include the 'categories' array - default true",
+							"disabled": true
+						},
+						{
+							"key": "api_key",
+							"value": "{{YOUR-API-KEY}}",
+							"disabled": true
+						}
+					]
+				},
+				"description": "#### Route\n\n[https://api.thecatapi.com/v1/images/search](https://api.thecatapi.com/v1/images/search)\n\nSearch through all approved images.\n\nAuthenticated using your API Key in the header as `x-api-key`, or as the `api_key` query parameter\n\n#### Query Parameters (most require a valid API Key)\n\n| Key | Required | Description |\n| --- | --- | --- |\n| size | optional | The size of image to return - `small`, `med` or `full`. `small` is perfect for Discord. Defaults to `med` |\n| mime_types | optional | Comma delimited string of the image types to return `gif`, `jpg`, or`png`. Defaults to return all types `jpg,gif,png`. |\n| format | optional | Response format `json`, or`src`. `src` will redirect straight to the image, so is useful for putting a link straight into HTML as the 'src' on an 'img' tag. Defaults to `json` |\n| order | optional | The order to return results in. `RANDOM`, `ASC` or `DESC`. If either `ASC` or `DESC` is passed then the Pagination headers will be on the response allowing you to see the total amount of results, and your current page. Default is `RANDOM` |\n| page | optional | Integer - used for Paginating through all the results. Only used when order is `ASC` or `DESC` |\n| limit | optional | Integer - number of results to return. Without an API Key you can only pass `1`, with a Key you can pass up to `25`. Default is `1` |\n| category_ids | optional | Comma delimited string of integers, matching the `id`'s of the Categories to filter the search. These categories can found in the `/v1/categories` request. e.g. category_ids=2 |\n| breed_ids | optional | Comma delimited string of integers, matching the `id`'s of the Breeds to filter the search. These categories can found in the `/v1/breeds` request |\n| has_breeds | optional | Only return images which have breed data attached. Integer - `0` or `1`. Default is `0` |\n\n#### Pagination\n\nIf order=ASC or order=DESC is passed, then the response will contain these values as Headers\n\n| Key | Description |\n| --- | --- |\n| Pagination-Count | Integer - the total amount of results matching your search |\n| Pagination-Page | Integer - the current page |\n| Pagination-Limit | Integer - amount of results being returned per page |\n|  |  |"
+			},
+			"response": []
+		},
+		{
+			"name": "/favourites",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1. Save an image as a Favourite successfully and add assertions to confirm that.",
+							"",
+							"// Saving id from response in a global variable",
+							"const response = pm.response.json();",
+							"pm.globals.set(\"favourite_id\", response.id);",
+							"",
+							"pm.test(\"Status code is OK/200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Asserting Success is returned\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.eql(\"SUCCESS\");",
+							"});",
+							"",
+							"pm.test(\"Asserting an id number is returned\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.id).to.be.a(\"number\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "x-api-key",
+						"value": "{{YOUR-API-KEY}}",
+						"description": "[required]"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"image_id\":\"{{image_id}}\",\n\t\"sub_id\":\"Naeem Raza\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{endpoint}}v1/favourites",
+					"host": [
+						"{{endpoint}}v1"
+					],
+					"path": [
+						"favourites"
+					]
+				},
+				"description": "\n\n#### POST Body Parameters\n\n| Key  | Required | Description                                                                                     |\n|------|----------|-------------------------------------------------------------------------------------------------|\n| image_id | required | The id of the image to favourite.\n| sub_id | optional | A custom value you can set yourself, and then use to split the results of GET /favourites by, e.g. your own user's id.                                                    |"
+			},
+			"response": []
+		},
+		{
+			"name": "/favourites",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 2. Get all your Favourite images successfully and add assertions to confirm that.",
+							"",
+							"pm.test(\"Status code is OK/200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"The response has all properties\", () => {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData[0]).to.be.an(\"object\");",
+							"        pm.expect(jsonData[0].id).to.be.a('number');",
+							"        pm.expect(jsonData[0].user_id).to.be.a('string');",
+							"        pm.expect(jsonData[0].image_id).to.be.a('string');",
+							"        pm.expect(jsonData[0].sub_id).to.be.a('string').eq(\"Naeem Raza\");",
+							"        pm.expect(jsonData[0].created_at).to.be.a('string');",
+							"        pm.expect(jsonData[0].image).to.be.an('object');",
+							"        pm.expect(jsonData[0].image.id).to.be.a('string');",
+							"        pm.expect(jsonData[0].image.url).to.be.a('string'); ",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "x-api-key",
+						"value": "{{YOUR-API-KEY}}",
+						"description": "[required]"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{endpoint}}v1/favourites?sub_id=Naeem Raza",
+					"host": [
+						"{{endpoint}}v1"
+					],
+					"path": [
+						"favourites"
+					],
+					"query": [
+						{
+							"key": "sub_id",
+							"value": "Naeem Raza",
+							"description": "[optional] To get the favourites for only the 'sub_id' you used when creating the Favourite via POST /favourites"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/favourites/:favourite_id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 3. Get a specific Favourite image successfully and add assertions to confirm that.",
+							"",
+							"pm.test(\"Status code is OK/200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"The response body has all the expected properties and values\", () => {",
+							"        var jsonData = pm.response.json();",
+							"        pm.expect(jsonData).to.be.an(\"object\");",
+							"        pm.expect(jsonData.id).to.be.a('number').eq(100094414);",
+							"        pm.expect(jsonData.user_id).to.be.a('string').eq(\"4\");",
+							"        pm.expect(jsonData.image_id).to.be.a('string').eq(\"Eqmn1kNAy\");",
+							"        pm.expect(jsonData.sub_id).to.be.a('string').eq(\"Naeem Raza\");",
+							"        pm.expect(jsonData.created_at).to.be.a('string').eq(\"2022-11-04T13:52:13.000Z\");",
+							"        pm.expect(jsonData.image).to.be.an('object');",
+							"        pm.expect(jsonData.image.id).to.be.a('string').eq(\"Eqmn1kNAy\");",
+							"        pm.expect(jsonData.image.url).to.be.a('string').eq(\"https://cdn2.thecatapi.com/images/Eqmn1kNAy.jpg\"); ",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "apikey"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "x-api-key",
+						"value": "{{YOUR-API-KEY}}",
+						"description": "[required]"
+					}
+				],
+				"url": {
+					"raw": "{{endpoint}}v1/favourites/:favourite_id",
+					"host": [
+						"{{endpoint}}v1"
+					],
+					"path": [
+						"favourites",
+						":favourite_id"
+					],
+					"variable": [
+						{
+							"key": "favourite_id",
+							"value": "100094414"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/favourites/:favourite_id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 4. Delete a specific Favourite image successfully and add assertions to confirm that.",
+							"",
+							"pm.test(\"Status code is OK/200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response body matches expected string SUCCESS\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.eql(\"SUCCESS\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "x-api-key",
+						"value": "{{YOUR-API-KEY}}",
+						"description": "[required]"
+					}
+				],
+				"url": {
+					"raw": "{{endpoint}}v1/favourites/:favourite_id",
+					"host": [
+						"{{endpoint}}v1"
+					],
+					"path": [
+						"favourites",
+						":favourite_id"
+					],
+					"variable": [
+						{
+							"key": "favourite_id",
+							"value": "{{favourite_id}}",
+							"description": "The id of the Favourite you want to delete from your account"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
