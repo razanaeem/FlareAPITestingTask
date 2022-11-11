@@ -15,7 +15,7 @@
 						"exec": [
 							"// Saving image id in a global variable",
 							"const response = pm.response.json();",
-							"pm.globals.set(\"image_id\", response[0].id);",
+							"pm.environment.set(\"image_id\", response[0].id);",
 							"",
 							"pm.test(\"Status code is OK/200\", function () {",
 							"    pm.response.to.have.status(200);",
@@ -155,7 +155,7 @@
 							"",
 							"// Saving id from response in a global variable",
 							"const response = pm.response.json();",
-							"pm.globals.set(\"favourite_id\", response.id);",
+							"pm.environment.set(\"favourite_id\", response.id);",
 							"",
 							"pm.test(\"Status code is OK/200\", function () {",
 							"    pm.response.to.have.status(200);",
@@ -400,6 +400,26 @@
 				}
 			},
 			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
 		}
 	]
 }
